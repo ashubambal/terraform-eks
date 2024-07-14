@@ -1,10 +1,19 @@
 name: Infra-Pipeline
 
 on:
+    workflow_dispatch:
+      inputs:
+        terraform_action:
+          type: choice
+          description: Select Terraform action
+          options:
+            - apply
+            - destroy
+  
     push:
-        branches:
-          - main
-          - stage
+      branches:
+        - main
+        - stage
 
 jobs:
     terraform:
