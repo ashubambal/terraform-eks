@@ -9,7 +9,8 @@ on:
         options:
           - apply
           - destroy
-
+          required: true
+          
   push:
     branches:
       - main
@@ -56,10 +57,12 @@ jobs:
 
         # Apply the terraform configuration  
       - name: Terraform Apply
+        if: ${{ github.event.inputs.terraform_action == 'apply' }}
         id: Apply
-        run: terraform apply -auto-approve
+        run: terraform ${{ github.event.inputs.terraform_action }} -auto-approve
 
         # Destroy the terraform configuration  
       - name: Terraform Destroy
+        if: ${{ github.event.inputs.terraform_action == 'destroy' }}
         id: Destroy
-        run: terraform destroy -auto-approve
+        run: terraform ${{ github.event.inputs.terraform_action }} -auto-approve
