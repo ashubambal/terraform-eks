@@ -9,8 +9,8 @@ on:
         options:
           - apply
           - destroy
-          required: true
-          
+        required: true
+
   push:
     branches:
       - main
