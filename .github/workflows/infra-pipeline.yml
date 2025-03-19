@@ -19,10 +19,6 @@ on:
 jobs:
   terraform:
     name: 'Terraform'
-    env:
-      # AWS Secrets
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     runs-on: ubuntu-latest
     environment: stage
 
@@ -31,38 +27,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Initialize a new or existing Terraform working diirectory by creating initial files, loading any remote state, downloading moduls etc.        
-      - uses: hashicorp/setup-terraform@v3
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Update this if your region is different
+
+      # Setup Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
       # Initialize Terraform
       - name: Terraform Init
         id: init
         run: terraform init
 
-        # Check Terraform Format
+      # Check Terraform Format
       - name: Terraform Fmt
         id: fmt
         run: terraform fmt -check
 
-        # Validate Terraform Configuration file  
+      # Validate Terraform Configuration file  
       - name: Terraform Validate
         id: validate
         run: terraform validate
 
-        # Generate and show terraform plan1
-      - name: Terraform plan
+      # Generate and show Terraform plan
+      - name: Terraform Plan
         id: plan
         run: terraform plan
         continue-on-error: true
 
-        # Apply the terraform configuration  
+      # Apply the terraform configuration  
       - name: Terraform Apply
         if: ${{ github.event.inputs.terraform_action == 'apply' }}
-        id: Apply
+        id: apply
         run: terraform ${{ github.event.inputs.terraform_action }} -auto-approve
 
-        # Destroy the terraform configuration  
+      # Destroy the terraform configuration  
       - name: Terraform Destroy
         if: ${{ github.event.inputs.terraform_action == 'destroy' }}
-        id: Destroy
+        id: destroy
         run: terraform ${{ github.event.inputs.terraform_action }} -auto-approve
